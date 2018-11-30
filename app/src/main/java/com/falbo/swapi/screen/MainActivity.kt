@@ -1,7 +1,6 @@
-package com.falbo.swapi
+package com.falbo.swapi.screen
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -9,12 +8,13 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import com.falbo.swapi.Service.PeopleService
-import com.falbo.swapi.Service.SpeciesService
-import com.falbo.swapi.models.People
+import com.falbo.swapi.R
+import com.falbo.swapi.service.PeopleService
+import com.falbo.swapi.service.SpeciesService
 import com.falbo.swapi.models.Peoples
 import com.falbo.swapi.models.Specie
-import com.falbo.swapi.models.Species
+import com.falbo.swapi.service.ConfigService
+import com.falbo.swapi.service.PeopleCall
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import retrofit2.*
@@ -34,45 +34,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
 
-        val retrofit= Retrofit.Builder()
-                              .baseUrl("https://swapi.co/api/")
-                              .addConverterFactory(GsonConverterFactory.create())
-                              .build()
 
-        val peoplesService = retrofit.create(PeopleService::class.java)
-
-        peoplesService.peoples("10").enqueue(object : Callback<Peoples>{
-            override fun onResponse(call: Call<Peoples>, response: Response<Peoples>) {
-                if(!response.isSuccessful){
-                    Log.e("FALBOUSER","Erro: " + response.code())
-                }else{
-                    val peoples = response.body()
-
-//                    peoples?.results?.forEach{
-//                        it.specie = it.species[0]
-//                        Log.e("FALBOUSER",it.name)
-//
-//                        getSpecie(it.specie)
-//                    }
-
-
-                    Log.e("FALBOUSER",peoples?.results?.get(0)?.name)
-
-                    peoples?.results?.get(0)?.specie = peoples?.results?.get(0)?.species?.get(0).toString()
-
-                    getSpecie(peoples?.results?.get(0)?.specie.toString())
-
-
-
-
-                }
-            }
-
-            override fun onFailure(call: Call<Peoples>, t: Throwable) {
-                Log.e("FALBO","Erro: " + t.message)
-            }
-        })
-
+        val pessoas = PeopleCall().getPeople("1")
+                    Log.e("FALBOUSER", pessoas.toString())
 
 //        peoplesService.people("2").enqueue(object : Callback<People>{
 //            override fun onResponse(call: Call<People>, response: Response<People>) {
@@ -94,13 +58,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     fun getSpecie( idSpecie: String){
 
-        val retrofit= Retrofit.Builder()
-                .baseUrl("https://swapi.co/api/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-
-        val speciesService = retrofit.create(SpeciesService::class.java)
+        val speciesService = ConfigService().retrofit.create(SpeciesService::class.java)
         speciesService.specie(idSpecie).enqueue(object : Callback<Specie>{
             override fun onResponse(call: Call<Specie>, response: Response<Specie>) {
                 if(!response.isSuccessful){
